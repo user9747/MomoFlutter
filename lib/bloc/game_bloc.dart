@@ -5,6 +5,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:momo/bloc/message_bloc.dart';
 import 'package:momo/bloc/speechinput_bloc.dart';
+import 'speechoutput_bloc.dart';
 import 'package:socket_io_flutter/socket_io_flutter.dart';
 
 import '../conf.dart';
@@ -15,15 +16,20 @@ part 'game_state.dart';
 class GameBloc extends Bloc<GameEvent, GameState> {
   SpeechinputBloc speechinputBloc;
   MessageBloc messageBloc;
+  SpeechoutputBloc speechoutputBloc;
 
   String uri = Conf.uri;
   SocketIOManager manager;
   SocketIO socket;
 
+  List<String> botMessages = [];
+
   @override
-  GameState get initialState => GameInitial();
+  GameState get initialState => GameIdleChat();
 
   GameBloc({this.messageBloc,this.speechinputBloc}){
+    speechoutputBloc = SpeechoutputBloc();
+    speechoutputBloc.listen(onSpeechGeneration);
     speechinputBloc.listen(onSpeechRecognition);
     manager = SocketIOManager();
     initSocket();
@@ -63,11 +69,19 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   Stream<GameState> mapEventToState(
     GameEvent event,
   ) async* {
-    print('Inside mapEventtostate of GameBloc');
-    if (event is RecievedMessage){
-      print('Game Bloc Recieved reply');
-      messageBloc.add(BotUttered(messageText: event.message));
-      speechinputBloc.add(ResetSpeechInput());
+    // print('Inside mapEventtostate of GameBloc');
+    if(state is GameIdleChat){
+      if (event is RecievedMessage){
+        print('Game Bloc Recieved reply');
+        if(speechoutputBloc.state is SpeechReadyState){
+          print("First Message");
+          speechoutputBloc.add(GenerateSpeechEvent(message: event.message));
+          messageBloc.add(BotUttered(messageText: event.message));
+        }
+        else{
+          botMessages.add(event.message);
+        }
+      }
     }
   }
 
@@ -84,7 +98,22 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       sendMessage(speechinputState.transcript);
     }
   }
+
+  void onSpeechGeneration(SpeechoutputState speechoutputState){
+    if(speechoutputState is SpeechCompletedState){
+      if(botMessages.isNotEmpty){
+        speechoutputBloc.add(GenerateSpeechEvent(message: botMessages.first));
+        messageBloc.add(BotUttered(messageText: botMessages.first));
+        botMessages.removeAt(0);
+      }
+      else{
+        speechoutputBloc.add(ResetSpeechEvent());
+        speechinputBloc.add(ResetSpeechInput());
+      }
+    }
+  }
   void dispose(){
+    speechoutputBloc.close();
     manager.clearInstance(socket);
   }
 }

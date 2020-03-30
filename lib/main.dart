@@ -69,7 +69,7 @@ class _TestAppState extends State<TestApp> {
                           child: Text('Processing...'),
                         );
                       }
-                      else if(state is ErrorEncountered){
+                      else if(state is SpeechInputError){
                         return Text(state.errorMessage);
                       }
                       else if (state is TextGenerated){

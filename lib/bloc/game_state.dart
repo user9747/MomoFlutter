@@ -9,7 +9,7 @@ class GameInitial extends GameState {
   List<Object> get props => [];
 }
 
-class GameIdle extends GameState {
+class GameIdleChat extends GameState {
   @override
   List<Object> get props => [];
 }
