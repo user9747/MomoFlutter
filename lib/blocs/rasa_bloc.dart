@@ -4,7 +4,7 @@ import './blocs.dart';
 import '../conf.dart';
 
 class RasaBloc extends Bloc<RasaEvent, RasaState> {
-  static String URI = Conf.URI;
+  static String uri = Conf.uri;
   SocketIOManager manager;
   SocketIO socket;
 
@@ -18,8 +18,8 @@ class RasaBloc extends Bloc<RasaEvent, RasaState> {
 
   initSocket() async {
     socket = await manager.createInstance(SocketOptions(
-        //Socket IO server URI
-        URI,
+        //Socket IO server uri
+        uri,
         //Enable or disable platform channel logging
         enableLogging: false,
         transports: [
