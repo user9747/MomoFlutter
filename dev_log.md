@@ -1,0 +1,3 @@
+# This log notes my observations and other ideas which may have to be implemented.
+
+While testing the speech to text for wordchain, there were very high levels of inaccuracy. Similar sounding words were often mistranslated, for eg fee was often heard as free, see was often heard as simply c and so on. The STT library does provide the option of seeing the alternative translations, which I think can be implemented. For example, when a misheard word is sent to the server and it results in a wrong word, the UI could display the other options as button, sort of like "Did you mean?". This would require an additional command in the server to indicate when the answer was incorrect, and storing the previous alternate responses in the STT bloc.

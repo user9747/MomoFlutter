@@ -73,7 +73,28 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     if(state is GameIdleChat){
       if (event is RecievedMessage){
         print('Game Bloc Recieved reply');
-        if(speechoutputBloc.state is SpeechReadyState){
+        if(event.message.startsWith('/')){
+          handleServerCommand(event.message);
+        }
+        else if(speechoutputBloc.state is SpeechReadyState){
+          print("First Message");
+          speechoutputBloc.add(GenerateSpeechEvent(message: event.message));
+          messageBloc.add(BotUttered(messageText: event.message));
+        }
+        else{
+          botMessages.add(event.message);
+        }
+      }
+      if(event is StartWordchain){
+        yield WordChain();
+      }
+    }
+    if(state is WordChain){
+      if(event is RecievedMessage){
+        if(event.message.startsWith('/')){
+          handleServerCommand(event.message);
+        }
+        else if(speechoutputBloc.state is SpeechReadyState){
           print("First Message");
           speechoutputBloc.add(GenerateSpeechEvent(message: event.message));
           messageBloc.add(BotUttered(messageText: event.message));
@@ -93,9 +114,24 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     print("Message emitted ...");
   }
 
+  void handleServerCommand(String message){
+    if(message == '/setgame[Word chain]'){
+      add(StartWordchain());
+    }
+  }
+
   void onSpeechRecognition(SpeechinputState speechinputState ) {
     if(speechinputState is TextGenerated){
-      sendMessage(speechinputState.transcript);
+      if(state is GameIdleChat)
+        sendMessage(speechinputState.transcript);
+      else if(state is WordChain){
+        if(speechinputState.transcript.contains("play"))
+          sendMessage(speechinputState.transcript);
+        else{
+          var word = speechinputState.transcript.toLowerCase();
+          sendMessage("/inform_word{\"userword\":\"$word\"}");
+        }
+      }
     }
   }
 

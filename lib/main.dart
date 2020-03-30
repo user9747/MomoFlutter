@@ -70,7 +70,17 @@ class _TestAppState extends State<TestApp> {
                         );
                       }
                       else if(state is SpeechInputError){
-                        return Text(state.errorMessage);
+                        return Column(
+                          children: <Widget>[
+                            Text(state.errorMessage),
+                            RaisedButton(
+                              onPressed: (){
+                                speechInputBloc.add(GetSpeechInput());
+                              },
+                              child: Text('Start Speaking'),
+                            ),
+                          ],
+                        );
                       }
                       else if (state is TextGenerated){
                         return Column(
