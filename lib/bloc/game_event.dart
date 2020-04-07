@@ -33,7 +33,17 @@ class StartWordchain extends GameEvent{
   List<Object> get props => [];
 }
 
+class GetSpeechGameEvent extends GameEvent{
+  @override
+  List<Object> get props => [];
+}
+
 class ResetGame extends GameEvent{
+  @override
+  List<Object> get props => [];
+}
+
+class TestEvent extends GameEvent{
   @override
   List<Object> get props => [];
 }

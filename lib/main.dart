@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import './bloc/bloc_exports.dart';
+import './bloc/detectimage_bloc_exports.dart';
 // import 'dart:convert';
 
-void main() => runApp(MyApp());
+void main(){
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   @override
@@ -22,6 +26,7 @@ class TestApp extends StatefulWidget {
 class _TestAppState extends State<TestApp> {
   final speechInputBloc = SpeechinputBloc();
   final messageBloc = MessageBloc();
+  final detectImageBloc = DetectImageBloc();
   GameBloc gameBloc;
 
   @override
@@ -41,6 +46,13 @@ class _TestAppState extends State<TestApp> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
+                  RaisedButton(
+                    
+                    child: Text('Test'),
+                    onPressed: (){
+                      gameBloc.add(TestEvent());
+                    },
+                  ),
                   BlocBuilder(
                     bloc: messageBloc,
                     builder: (context, state) {
@@ -108,6 +120,7 @@ class _TestAppState extends State<TestApp> {
     gameBloc.close();
     speechInputBloc.close();
     messageBloc.close();
+    detectImageBloc.close();
   }
 }
 

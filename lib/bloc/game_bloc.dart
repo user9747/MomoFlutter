@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:momo/bloc/message_bloc.dart';
 import 'package:momo/bloc/speechinput_bloc.dart';
 import 'speechoutput_bloc.dart';
+import 'detectimage_bloc_exports.dart';
 import 'package:socket_io_flutter/socket_io_flutter.dart';
 
 import '../conf.dart';
@@ -17,6 +18,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   SpeechinputBloc speechinputBloc;
   MessageBloc messageBloc;
   SpeechoutputBloc speechoutputBloc;
+  DetectImageBloc detectimageBloc;
 
   String uri = Conf.uri;
   SocketIOManager manager;
@@ -29,8 +31,10 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
   GameBloc({this.messageBloc,this.speechinputBloc}){
     speechoutputBloc = SpeechoutputBloc();
+    detectimageBloc = DetectImageBloc();
     speechoutputBloc.listen(onSpeechGeneration);
     speechinputBloc.listen(onSpeechRecognition);
+    detectimageBloc.listen(onImageDetection);
     manager = SocketIOManager();
     initSocket();
   }
@@ -69,7 +73,10 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   Stream<GameState> mapEventToState(
     GameEvent event,
   ) async* {
-    // print('Inside mapEventtostate of GameBloc');
+    //Event for testing purposes.
+    if(event is TestEvent){
+      add(RecievedMessage(message: '/takephoto'));
+    }
     if(state is GameIdleChat){
       if (event is RecievedMessage){
         print('Game Bloc Recieved reply');
@@ -115,8 +122,14 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   }
 
   void handleServerCommand(String message){
-    if(message == '/setgame[Word chain]'){
-      add(StartWordchain());
+    switch (message) {
+      case '/setgame[Word chain]':
+        add(StartWordchain());
+        break;
+      case '/takephoto':
+        detectimageBloc.add(CaptureImage());
+        break;
+      default:
     }
   }
 
@@ -146,6 +159,12 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         speechoutputBloc.add(ResetSpeechEvent());
         speechinputBloc.add(ResetSpeechInput());
       }
+    }
+  }
+  void onImageDetection(DetectImageState detectimageState){
+    if(detectimageState is ImageDetected){
+      print(detectimageState.image);
+      sendMessage(detectimageState.image);
     }
   }
   void dispose(){
