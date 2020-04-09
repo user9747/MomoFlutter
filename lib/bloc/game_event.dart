@@ -47,3 +47,13 @@ class TestEvent extends GameEvent{
   @override
   List<Object> get props => [];
 }
+
+class CorrectAnswer extends GameEvent{
+  @override
+  List<Object> get props => [];
+}
+
+class WrongAnswer extends GameEvent{
+  @override
+  List<Object> get props => [];
+}

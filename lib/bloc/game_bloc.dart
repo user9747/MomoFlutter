@@ -26,6 +26,9 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
   List<String> botMessages = [];
 
+  String word;
+  List<String> answers;
+
   @override
   GameState get initialState => GameIdleChat();
 
@@ -110,6 +113,28 @@ class GameBloc extends Bloc<GameEvent, GameState> {
           botMessages.add(event.message);
         }
       }
+      if(event is CorrectAnswer){
+        if(speechoutputBloc.state is SpeechReadyState){
+          print("First Message");
+          speechoutputBloc.add(GenerateSpeechEvent(message: 'Wow that\'s correct. My next word is'));
+          messageBloc.add(BotUttered(messageText: 'Wow that\'s correct. My next word is'));
+        }
+        else{
+          botMessages.add('Wow that\'s correct. My next word is');
+        }
+        sendMessage("/inform_word{\"userword\":\"$word\"}");
+      }
+      if(event is WrongAnswer){
+        if(speechoutputBloc.state is SpeechReadyState){
+          print("First Message");
+          speechoutputBloc.add(GenerateSpeechEvent(message: 'I am sorry but that is not a correct answer'));
+          messageBloc.add(BotUttered(messageText: 'I am sorry but that is not a correct answer'));
+        }
+        else{
+          botMessages.add('I am sorry but that is not a correct answer');
+        }
+        botMessages.add('Try again, my word was ${this.word}');
+      }
     }
   }
 
@@ -131,6 +156,18 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         break;
       default:
     }
+    if(message.startsWith('/word')){
+      this.word = message.substring(6);
+      this.word = this.word.replaceAll("}", " ").trimRight();
+      print(this.word);
+      this.add(RecievedMessage(message: this.word));
+    }
+    if(message.startsWith('/answer')){
+      message = message.substring(8);
+      this.answers = message.split(',');
+      answers.removeLast();
+      print(this.answers);
+    }
   }
 
   void onSpeechRecognition(SpeechinputState speechinputState ) {
@@ -138,11 +175,14 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       if(state is GameIdleChat)
         sendMessage(speechinputState.transcript);
       else if(state is WordChain){
-        if(speechinputState.transcript.contains("play"))
+        if(speechinputState.transcript.contains(" ")){
           sendMessage(speechinputState.transcript);
+        }
+        else if(this.answers.contains(speechinputState.transcript.toLowerCase())){
+          this.add(CorrectAnswer());
+        }
         else{
-          var word = speechinputState.transcript.toLowerCase();
-          sendMessage("/inform_word{\"userword\":\"$word\"}");
+          this.add(WrongAnswer());
         }
       }
     }
