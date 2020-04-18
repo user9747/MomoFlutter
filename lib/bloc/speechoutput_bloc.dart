@@ -37,9 +37,12 @@ class SpeechoutputBloc extends Bloc<SpeechoutputEvent, SpeechoutputState> {
 
   void initLang() async {
     dynamic languages = await flutterTts.getLanguages;
+    dynamic voices = await flutterTts.getVoices;
     if(languages != null){
       print("Following languages were found");
       print(languages);
+      print("Following voices were found");
+      print(voices);
       flutterTts.setLanguage("en-US");
     }
     else

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
@@ -80,39 +81,29 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     if(event is TestEvent){
       add(RecievedMessage(message: '/takephoto'));
     }
-    if(state is GameIdleChat){
-      if (event is RecievedMessage){
-        print('Game Bloc Recieved reply');
-        if(event.message.startsWith('/')){
-          handleServerCommand(event.message);
-        }
-        else if(speechoutputBloc.state is SpeechReadyState){
-          print("First Message");
-          speechoutputBloc.add(GenerateSpeechEvent(message: event.message));
-          messageBloc.add(BotUttered(messageText: event.message));
-        }
-        else{
-          botMessages.add(event.message);
-        }
+    else if (event is RecievedMessage){
+      print('Game Bloc Recieved reply');
+      if(event.message.startsWith('/')){
+        handleServerCommand(event.message);
       }
+      else if(speechoutputBloc.state is SpeechReadyState){
+        print("First Message");
+        speechoutputBloc.add(GenerateSpeechEvent(message: event.message));
+        messageBloc.add(BotUttered(messageText: event.message));
+      }
+      else{
+        botMessages.add(event.message);
+      }
+    }
+    else if(state is GameIdleChat){
       if(event is StartWordchain){
         yield WordChain();
       }
-    }
-    if(state is WordChain){
-      if(event is RecievedMessage){
-        if(event.message.startsWith('/')){
-          handleServerCommand(event.message);
-        }
-        else if(speechoutputBloc.state is SpeechReadyState){
-          print("First Message");
-          speechoutputBloc.add(GenerateSpeechEvent(message: event.message));
-          messageBloc.add(BotUttered(messageText: event.message));
-        }
-        else{
-          botMessages.add(event.message);
-        }
+      if(event is StartISpy){
+        yield ISpy();
       }
+    }
+    else if(state is WordChain){
       if(event is CorrectAnswer){
         if(speechoutputBloc.state is SpeechReadyState){
           print("First Message");
@@ -136,6 +127,9 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         botMessages.add('Try again, my word was ${this.word}');
       }
     }
+    else if (state is ISpy){
+
+    }
   }
 
   void sendMessage(String msg) {
@@ -148,8 +142,11 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
   void handleServerCommand(String message){
     switch (message) {
-      case '/setgame[Word chain]':
+      case '/setgame[word chain]':
         add(StartWordchain());
+        break;
+      case '/setgame[I spy]':
+        add(StartISpy());
         break;
       case '/takephoto':
         detectimageBloc.add(CaptureImage());
@@ -172,9 +169,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
   void onSpeechRecognition(SpeechinputState speechinputState ) {
     if(speechinputState is TextGenerated){
-      if(state is GameIdleChat)
-        sendMessage(speechinputState.transcript);
-      else if(state is WordChain){
+      if(state is WordChain){
         if(speechinputState.transcript.contains(" ")){
           sendMessage(speechinputState.transcript);
         }
@@ -185,6 +180,8 @@ class GameBloc extends Bloc<GameEvent, GameState> {
           this.add(WrongAnswer());
         }
       }
+      else
+        sendMessage(speechinputState.transcript);
     }
   }
 
@@ -203,8 +200,20 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   }
   void onImageDetection(DetectImageState detectimageState){
     if(detectimageState is ImageDetected){
+      print("detected image\n");
       print(detectimageState.image);
-      sendMessage(detectimageState.image);
+      var image = jsonDecode(detectimageState.image);
+      if(image["data"].isEmpty){
+        print("No objects detected");
+        add(RecievedMessage(message: "I'm Sorry but I could not find anything, could you try again pwees"));
+      }
+      else{
+        var imgText = detectimageState.image.replaceAll("\"", "'");
+        imgText = imgText.replaceAll(new RegExp("\n|\t| "), '');
+        print("/inform_object_details{\"object_list\":\"$imgText\"}");
+        sendMessage("/inform_object_details{\"object_list\":\"$imgText\"}");
+      }
+      //sendMessage(detectimageState.image);
     }
   }
   void dispose(){
