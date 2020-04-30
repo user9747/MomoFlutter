@@ -33,3 +33,13 @@ class WordChain extends GameState{
   @override
   List<Object> get props => [];
 }
+
+class MomoTalking extends GameState{
+  @override
+  List<Object> get props => [];
+}
+
+class MomoSilent extends GameState{
+  @override
+  List<Object> get props => [];
+}

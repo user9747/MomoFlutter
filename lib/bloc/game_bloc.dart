@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:momo/bloc/bloc_exports.dart';
 import 'package:momo/bloc/message_bloc.dart';
 import 'package:momo/bloc/speechinput_bloc.dart';
 import 'speechoutput_bloc.dart';
@@ -80,6 +81,12 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     //Event for testing purposes.
     if(event is TestEvent){
       add(RecievedMessage(message: '/takephoto'));
+    }
+    else if(event is MomoTalk){
+      yield MomoTalking();
+    }
+    else if(event is MomoStopTalk){
+      yield MomoSilent();
     }
     else if (event is RecievedMessage){
       print('Game Bloc Recieved reply');
@@ -186,7 +193,11 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   }
 
   void onSpeechGeneration(SpeechoutputState speechoutputState){
+    if(speechoutputState is SpeakingState){
+      add(MomoTalk());
+    }
     if(speechoutputState is SpeechCompletedState){
+      add(MomoStopTalk());
       if(botMessages.isNotEmpty){
         speechoutputBloc.add(GenerateSpeechEvent(message: botMessages.first));
         messageBloc.add(BotUttered(messageText: botMessages.first));
@@ -205,7 +216,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
       var image = jsonDecode(detectimageState.image);
       if(image["data"].isEmpty){
         print("No objects detected");
-        add(RecievedMessage(message: "I'm Sorry but I could not find anything, could you try again pwees"));
+        add(RecievedMessage(message: "I'm Sorry but I could not find anything, could you try again please"));
       }
       else{
         var imgText = detectimageState.image.replaceAll("\"", "'");

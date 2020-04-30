@@ -57,3 +57,13 @@ class WrongAnswer extends GameEvent{
   @override
   List<Object> get props => [];
 }
+
+class MomoTalk extends GameEvent{
+  @override
+  List<Object> get props => [];
+}
+
+class MomoStopTalk extends GameEvent{
+  @override
+  List<Object> get props => [];
+}
