@@ -67,14 +67,7 @@ class _TestAppState extends State<TestApp> with SingleTickerProviderStateMixin {
         actions: <Widget>[
           IconButton(
             onPressed: () {
-              print("pressed");
-              // print(_animationController.status);
-              isp
-                  ? _animationController.forward()
-                  : _animationController.repeat();
-              isp = !isp;
-              // _animationController.reset();
-              // _animationController.forward();
+              return helpDialog(context);
             },
             icon: Icon(
               Icons.help_outline,
@@ -163,6 +156,30 @@ class _TestAppState extends State<TestApp> with SingleTickerProviderStateMixin {
         ),
       ),
     );
+  }
+
+  helpDialog(BuildContext context) {
+    return showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return Dialog(
+            backgroundColor: Colors.white,
+            child: Text('''Help                        
+
+
+
+                data ivdey
+            
+             ezhuthanam 
+             
+             
+             
+                  poda gopala
+             
+             
+             ''',style: TextStyle(color: Colors.deepPurpleAccent),),
+          );
+        });
   }
 
   @override
