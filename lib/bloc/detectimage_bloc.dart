@@ -19,6 +19,11 @@ class DetectImageBloc extends Bloc<DetectImageEvent, DetectImageState> {
   DetectImageBloc() {
     // url = 'https://postman-echo.com/post';
     url = Conf.flask_uri;
+    wakeUpHeroku(url);
+  }
+  wakeUpHeroku(String url) async{
+    var response = await http.get(url);
+    print(response);
   }
 
   @override
