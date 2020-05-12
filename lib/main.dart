@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:momo/bloc/speechoutput_bloc.dart';
 import './bloc/bloc_exports.dart';
 import './bloc/detectimage_bloc_exports.dart';
 import 'custom_ui.dart';
@@ -87,11 +88,11 @@ class _TestAppState extends State<TestApp> with SingleTickerProviderStateMixin {
             children: <Widget>[
               // spinkit,
               BlocBuilder(
-                  bloc: gameBloc,
+                  bloc: gameBloc.speechoutputBloc,
                   builder: (context, state) {
-                    if (state is MomoTalking) {
+                    if (state is SpeakingState) {
                       _animationController.repeat();
-                    } else if (state is MomoSilent) {
+                    } else if (state is SpeechCompletedState) {
                       _animationController.forward();
                     }
                     return spinkit;

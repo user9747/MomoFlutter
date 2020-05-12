@@ -88,6 +88,12 @@ class GameBloc extends Bloc<GameEvent, GameState> {
     else if(event is MomoStopTalk){
       yield MomoSilent();
     }
+    else if(event is StartWordchain){
+      yield WordChain();
+    }
+    else if(event is StartISpy){
+      yield ISpy();
+    }
     else if (event is RecievedMessage){
       print('Game Bloc Recieved reply');
       if(event.message.startsWith('/')){
@@ -102,14 +108,6 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         botMessages.add(event.message);
       }
     }
-    else if(state is GameIdleChat){
-      if(event is StartWordchain){
-        yield WordChain();
-      }
-      if(event is StartISpy){
-        yield ISpy();
-      }
-    }
     else if(state is WordChain){
       if(event is CorrectAnswer){
         if(speechoutputBloc.state is SpeechReadyState){
@@ -120,6 +118,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         else{
           botMessages.add('Wow that\'s correct. My next word is');
         }
+        print("/inform_word{\"userword\":\"$word\"}");
         sendMessage("/inform_word{\"userword\":\"$word\"}");
       }
       if(event is WrongAnswer){
@@ -148,11 +147,12 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   }
 
   void handleServerCommand(String message){
-    switch (message) {
+    print("server command: ${message.toLowerCase()}");
+    switch (message.toLowerCase()) {
       case '/setgame[word chain]':
         add(StartWordchain());
         break;
-      case '/setgame[I spy]':
+      case '/setgame[i spy]':
         add(StartISpy());
         break;
       case '/takephoto':
@@ -177,6 +177,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
   void onSpeechRecognition(SpeechinputState speechinputState ) {
     if(speechinputState is TextGenerated){
       if(state is WordChain){
+        print("Sending wordchain word");
         if(speechinputState.transcript.contains(" ")){
           sendMessage(speechinputState.transcript);
         }
@@ -194,10 +195,10 @@ class GameBloc extends Bloc<GameEvent, GameState> {
 
   void onSpeechGeneration(SpeechoutputState speechoutputState){
     if(speechoutputState is SpeakingState){
-      add(MomoTalk());
+      // add(MomoTalk());
     }
     if(speechoutputState is SpeechCompletedState){
-      add(MomoStopTalk());
+      // add(MomoStopTalk());
       if(botMessages.isNotEmpty){
         speechoutputBloc.add(GenerateSpeechEvent(message: botMessages.first));
         messageBloc.add(BotUttered(messageText: botMessages.first));
