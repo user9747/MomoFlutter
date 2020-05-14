@@ -90,10 +90,16 @@ class _TestAppState extends State<TestApp> with SingleTickerProviderStateMixin {
               BlocBuilder(
                   bloc: gameBloc.speechoutputBloc,
                   builder: (context, state) {
+                    if (state is SpeechCompletedState) {
+                      _animationController.forward();
+                      print("kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk");
+                    }
                     if (state is SpeakingState) {
                       _animationController.repeat();
-                    } else if (state is SpeechCompletedState) {
+                      print("jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj");
+                    } else {
                       _animationController.forward();
+                      print("lllllllllllllllllllll");
                     }
                     return spinkit;
                   }),
@@ -109,12 +115,22 @@ class _TestAppState extends State<TestApp> with SingleTickerProviderStateMixin {
                 bloc: messageBloc,
                 builder: (context, state) {
                   if (state is BotMessage) {
-                    return Center(child: Text(state.messageText));
+                    return Center(
+                        child: Text(
+                      'MoMo: ' + state.messageText,
+                      style: TextStyle(color: Colors.purple[900]),
+                    ));
                   } else if (state is MessageInitial) {
                     return Center(
-                        child: Text("Say Hello Momo to Start a conversation"));
+                        child: Text(
+                      "MoMo: Say Hello Momo to Start a conversation",
+                      style: TextStyle(color: Colors.purple[900]),
+                    ));
                   }
-                  return Text('Say Hello Momo to Start a conversation');
+                  return Text(
+                    'MoMo: Say Hello Momo to Start a conversation',
+                    style: TextStyle(color: Colors.purple[900]),
+                  );
                 },
               ),
               BlocBuilder(
@@ -142,12 +158,9 @@ class _TestAppState extends State<TestApp> with SingleTickerProviderStateMixin {
                         ],
                       );
                     } else if (state is TextGenerated) {
-                      return Column(
-                        children: <Widget>[
-                          Text('Waiting for Server Response'),
-                          Text('Your input was'),
-                          Text(state.transcript)
-                        ],
+                      return Text(
+                        'YOU: ' + state.transcript,
+                        style: TextStyle(color: Colors.green),
                       );
                     }
                     return Text('unhandled state ${state.runtimeType}');
@@ -165,7 +178,8 @@ class _TestAppState extends State<TestApp> with SingleTickerProviderStateMixin {
         builder: (BuildContext context) {
           return Dialog(
             backgroundColor: Colors.white,
-            child: Text('''Help                        
+            child: Text(
+              '''Help                        
 
 
 
@@ -178,7 +192,9 @@ class _TestAppState extends State<TestApp> with SingleTickerProviderStateMixin {
                   poda gopala
              
              
-             ''',style: TextStyle(color: Colors.deepPurpleAccent),),
+             ''',
+              style: TextStyle(color: Colors.deepPurpleAccent),
+            ),
           );
         });
   }

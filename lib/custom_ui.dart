@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 class MyCard extends StatelessWidget {
   Widget child;
   double height;
-  MyCard({@required this.child,this.height = 200});
+  MyCard({@required this.child,this.height = 150});
   @override
   Widget build(BuildContext context) {
     return AnimatedContainer(
       duration: Duration(seconds: 1),
       curve: Curves.fastOutSlowIn,
       height: this.height,
-      margin: EdgeInsets.all(100),
+      margin: EdgeInsets.all(10),
       child: Center(
         child: this.child,
       ),
