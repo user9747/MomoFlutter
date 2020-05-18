@@ -27,7 +27,6 @@ class SpeechoutputBloc extends Bloc<SpeechoutputEvent, SpeechoutputState> {
     });
     flutterTts.setCompletionHandler((){
       print("Stopped");
-      add(SpeechGenerationCompletedEvent());
     });
     flutterTts.setErrorHandler((msg){
       print("Error Encountered");
