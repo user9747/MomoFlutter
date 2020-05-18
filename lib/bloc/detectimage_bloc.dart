@@ -57,7 +57,7 @@ class DetectImageBloc extends Bloc<DetectImageEvent, DetectImageState> {
 
     CameraController _controller = CameraController(
       firstCamera,
-      ResolutionPreset.low,
+      ResolutionPreset.medium,
     );
     _initializeControllerFuture = _controller.initialize();
     try {
